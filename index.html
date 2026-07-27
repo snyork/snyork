@@ -15,7 +15,7 @@
     --paper: #EEF2F6;       /* blueprint paper */
     --paper-dim: #C9D6E4;
     --ink-text: #DCE6F2;
-    --muted: #93AAC7;
+    --muted: #ACC0DC;
     --signal: #E8873A;      /* copper/amber accent - the "live trace" */
     --signal-dim: rgba(232,135,58,0.18);
     --teal: #4FA491;
@@ -23,6 +23,24 @@
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{scroll-behavior:smooth;}
+  a:focus-visible, button:focus-visible, .btn:focus-visible{
+    outline:2px solid var(--signal); outline-offset:3px; border-radius:2px;
+  }
+  .skip-link{
+    position:absolute; left:12px; top:-60px; z-index:100;
+    background:var(--signal); color:#1a0e04; font-family:'IBM Plex Mono', monospace;
+    font-size:13px; font-weight:600; padding:10px 16px; border-radius:2px;
+    text-decoration:none; transition:top .15s ease;
+  }
+  .skip-link:focus{top:12px;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *, *::before, *::after{
+      animation-duration:0.001ms !important; animation-iteration-count:1 !important;
+      transition-duration:0.001ms !important; scroll-behavior:auto !important;
+    }
+    [data-reveal]{opacity:1 !important; transform:none !important;}
+  }
   body{
     background:var(--ink);
     color:var(--ink-text);
@@ -53,19 +71,56 @@
     background:rgba(11,30,61,0.88); backdrop-filter:blur(8px);
     border-bottom:1px solid var(--line-soft);
   }
-  nav .wrap{display:flex; align-items:center; justify-content:space-between; height:64px;}
-  .brand{font-family:'Space Grotesk'; font-weight:700; font-size:17px; letter-spacing:0.02em;}
-  .brand span{color:var(--signal);}
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; height:64px; gap:12px;}
+  .brand{
+    font-family:'Space Grotesk'; font-weight:700; font-size:clamp(14px, 4.2vw, 17px);
+    letter-spacing:0.02em; white-space:nowrap; flex-shrink:0;
+  }
   .navlinks{display:flex; gap:28px; font-size:13.5px; align-items:center;}
-  .navlinks a{opacity:0.8; text-decoration:none; transition:opacity .2s;}
+  .navlinks a{opacity:0.85; text-decoration:none; transition:opacity .2s;}
   .navlinks a:hover{opacity:1;}
   .status-pill{
     display:flex; align-items:center; gap:7px;
     font-family:'IBM Plex Mono'; font-size:11px; letter-spacing:0.04em; text-transform:uppercase;
     border:1px solid var(--line); padding:6px 12px; border-radius:999px; color:var(--muted);
   }
-  .status-dot{width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 0 3px rgba(79,164,145,0.25);}
-  @media (max-width:640px){ .navlinks a.hide-mobile{display:none;} }
+  .status-dot{width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 0 3px rgba(79,164,145,0.25); flex-shrink:0;}
+
+  /* mobile hamburger toggle */
+  .nav-toggle{
+    display:none; align-items:center; justify-content:center;
+    width:44px; height:44px; flex-shrink:0;
+    background:transparent; border:1px solid var(--line-soft); border-radius:4px;
+    cursor:pointer;
+  }
+  .nav-toggle-bars{position:relative; width:18px; height:13px;}
+  .nav-toggle-bar{
+    position:absolute; left:0; width:100%; height:1.5px; background:var(--ink-text);
+    transition:transform .2s ease, opacity .2s ease, top .2s ease;
+  }
+  .nav-toggle-bar:nth-child(1){top:0;}
+  .nav-toggle-bar:nth-child(2){top:6px;}
+  .nav-toggle-bar:nth-child(3){top:12px;}
+  .nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(1){top:6px; transform:rotate(45deg);}
+  .nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(2){opacity:0;}
+  .nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(3){top:6px; transform:rotate(-45deg);}
+
+  .mobile-menu{
+    display:none; flex-direction:column; gap:4px;
+    background:var(--ink-2); border-bottom:1px solid var(--line-soft);
+    padding:10px 20px 18px;
+  }
+  .mobile-menu a{
+    display:block; padding:12px 4px; font-size:15px; text-decoration:none; color:var(--ink-text);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .mobile-menu .status-pill{margin-top:12px; align-self:flex-start;}
+  .mobile-menu[data-open="true"]{display:flex;}
+
+  @media (max-width:640px){
+    .navlinks{display:none;}
+    .nav-toggle{display:flex;}
+  }
 
   /* HERO */
   .hero{padding:88px 0 60px; overflow:hidden;}
@@ -176,7 +231,7 @@
   }
   .tl-item.current .tl-num{background:var(--signal); border-color:var(--signal); color:#1a0e04;}
   .tl-head{display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px; margin-bottom:4px;}
-  .tl-role{font-family:'Space Grotesk'; font-size:17px; color:#fff; font-weight:600;}
+  .tl-role{font-family:'Space Grotesk'; font-size:17px; color:#fff; font-weight:600; margin:0;}
   .tl-dates{font-family:'IBM Plex Mono'; font-size:11.5px; color:var(--signal); white-space:nowrap;}
   .tl-company{font-size:13.5px; color:var(--muted); margin-bottom:12px;}
   .tl-item ul{padding-left:18px; color:var(--paper-dim); font-size:14px;}
@@ -208,18 +263,36 @@
 </head>
 <body>
 
+<a href="#main" class="skip-link">Skip to main content</a>
+
 <nav>
   <div class="wrap">
     <div class="brand">Steve N. York</div>
     <div class="navlinks">
-      <a href="#about" class="hide-mobile">Profile</a>
-      <a href="#expertise" class="hide-mobile">Expertise</a>
-      <a href="#experience" class="hide-mobile">Experience</a>
-      <a href="#contact" class="hide-mobile">Contact</a>
-      <div class="status-pill"><div class="status-dot"></div>Open to MarTech Leadership Roles</div>
+      <a href="#about">Profile</a>
+      <a href="#expertise">Expertise</a>
+      <a href="#experience">Experience</a>
+      <a href="#contact">Contact</a>
+      <div class="status-pill"><div class="status-dot" aria-hidden="true"></div>Open to MarTech Leadership Roles</div>
     </div>
+    <button type="button" class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
+      <span class="nav-toggle-bars" aria-hidden="true">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </span>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu" data-open="false">
+    <a href="#about">Profile</a>
+    <a href="#expertise">Expertise</a>
+    <a href="#experience">Experience</a>
+    <a href="#contact">Contact</a>
+    <div class="status-pill"><div class="status-dot" aria-hidden="true"></div>Open to MarTech Leadership Roles</div>
   </div>
 </nav>
+
+<main id="main">
 
 <section class="hero">
   <div class="wrap hero-grid">
@@ -234,7 +307,7 @@
 
     <div>
       <div class="diagram-wrap" id="diagram">
-        <svg viewBox="0 0 460 460" width="100%" height="100%" style="position:absolute; top:0; left:0;">
+        <svg viewBox="0 0 460 460" width="100%" height="100%" style="position:absolute; top:0; left:0;" aria-hidden="true" focusable="false">
           <path class="flow-line" d="M230,230 L60,230"/>
           <path class="flow-line" d="M230,230 L400,230"/>
           <path class="flow-line" d="M230,230 L100,370"/>
@@ -242,25 +315,25 @@
           <path class="flow-trace" d="M230,230 L100,90"/>
           <path class="flow-trace" d="M230,230 L360,90"/>
         </svg>
-        <div class="node center" style="top:50%; left:50%;"><div class="dot"></div>Marketing<br>Activation</div>
-        <div class="node owned" style="top:19.5%; left:21.7%;"><div class="dot"></div>Salesforce<br>CRM</div>
-        <div class="node owned" style="top:19.5%; left:78.3%;"><div class="dot"></div>SFMC</div>
-        <div class="node partner" style="top:50%; left:13%;"><div class="dot"></div>Customer<br>Data Platform</div>
-        <div class="node partner" style="top:50%; left:87%;"><div class="dot"></div>Data<br>Warehouse</div>
-        <div class="node partner" style="top:80.5%; left:21.7%;"><div class="dot"></div>Website<br>Data</div>
-        <div class="node partner" style="top:80.5%; left:78.3%;"><div class="dot"></div>Analytics<br>Data</div>
+        <div class="node center" style="top:50%; left:50%;"><div class="dot" aria-hidden="true"></div>Marketing<br>Activation</div>
+        <div class="node owned" style="top:19.5%; left:21.7%;"><div class="dot" aria-hidden="true"></div>Salesforce<br>CRM</div>
+        <div class="node owned" style="top:19.5%; left:78.3%;"><div class="dot" aria-hidden="true"></div>SFMC</div>
+        <div class="node partner" style="top:50%; left:13%;"><div class="dot" aria-hidden="true"></div>Customer<br>Data Platform</div>
+        <div class="node partner" style="top:50%; left:87%;"><div class="dot" aria-hidden="true"></div>Data<br>Warehouse</div>
+        <div class="node partner" style="top:80.5%; left:21.7%;"><div class="dot" aria-hidden="true"></div>Website<br>Data</div>
+        <div class="node partner" style="top:80.5%; left:78.3%;"><div class="dot" aria-hidden="true"></div>Analytics<br>Data</div>
       </div>
       <div class="diagram-caption">// product owner: CRM &amp; SFMC — cross-platform partner on the rest</div>
       <div class="diagram-legend">
-        <span><span class="legend-dot owned"></span>Owned platform</span>
-        <span><span class="legend-dot partner"></span>Partner collaboration</span>
+        <span><span class="legend-dot owned" aria-hidden="true"></span>Owned platform</span>
+        <span><span class="legend-dot partner" aria-hidden="true"></span>Partner collaboration</span>
       </div>
     </div>
   </div>
 </section>
 
 <section class="about" id="about">
-  <div class="tick tl"></div><div class="tick tr"></div>
+  <div class="tick tl" aria-hidden="true"></div><div class="tick tr" aria-hidden="true"></div>
   <div class="wrap">
     <div class="section-head"><span class="section-num">01</span><h2>Profile</h2><div class="section-rule"></div></div>
     <div class="about-body" data-reveal>
@@ -317,7 +390,7 @@
 
       <div class="tl-item current">
         <div class="tl-num">→</div>
-        <div class="tl-head"><span class="tl-role">AVP, Marketing Technology Delivery Lead</span><span class="tl-dates">04/24 — Present</span></div>
+        <div class="tl-head"><h3 class="tl-role">AVP, Marketing Technology Delivery Lead</h3><span class="tl-dates">04/24 — Present</span></div>
         <div class="tl-company">Chubb · New York, NY</div>
         <ul>
           <li>Own product strategy and roadmap for Salesforce CRM and SFMC, partnering with product owners across Adobe RT-CDP and AEM to streamline integrations for enterprise marketing activation.</li>
@@ -329,7 +402,7 @@
 
       <div class="tl-item">
         <div class="tl-num">6</div>
-        <div class="tl-head"><span class="tl-role">Marketing Technology Manager</span><span class="tl-dates">03/23 — 04/24</span></div>
+        <div class="tl-head"><h3 class="tl-role">Marketing Technology Manager</h3><span class="tl-dates">03/23 — 04/24</span></div>
         <div class="tl-company">Diageo · New York, NY</div>
         <ul>
           <li>Led content and marketing automation teams across 30+ brand websites, driving real-time data activation via a Treasure Data–powered CDP.</li>
@@ -339,7 +412,7 @@
 
       <div class="tl-item">
         <div class="tl-num">5</div>
-        <div class="tl-head"><span class="tl-role">Lead Solution Architect / Director of MarTech</span><span class="tl-dates">12/21 — 01/23</span></div>
+        <div class="tl-head"><h3 class="tl-role">Lead Solution Architect / Director of MarTech</h3><span class="tl-dates">12/21 — 01/23</span></div>
         <div class="tl-company">Response Labs · Baltimore, MD (NYC Remote)</div>
         <ul>
           <li>Designed technical solutions within SFMC and Klaviyo for major client campaigns across regulated and consumer industries.</li>
@@ -349,7 +422,7 @@
 
       <div class="tl-item">
         <div class="tl-num">4</div>
-        <div class="tl-head"><span class="tl-role">Manager of Digital Solutions</span><span class="tl-dates">08/21 — 12/21</span></div>
+        <div class="tl-head"><h3 class="tl-role">Manager of Digital Solutions</h3><span class="tl-dates">08/21 — 12/21</span></div>
         <div class="tl-company">Epsilon Data Management · Irving, TX (NYC Remote)</div>
         <ul>
           <li>Advised Fortune 500 clients on MAP architecture and end-to-end data flow design, improving marketing attribution accuracy.</li>
@@ -358,7 +431,7 @@
 
       <div class="tl-item">
         <div class="tl-num">3</div>
-        <div class="tl-head"><span class="tl-role">Sr. Platform Developer</span><span class="tl-dates">09/20 — 08/21</span></div>
+        <div class="tl-head"><h3 class="tl-role">Sr. Platform Developer</h3><span class="tl-dates">09/20 — 08/21</span></div>
         <div class="tl-company">Experian · Costa Mesa, CA (NYC Remote)</div>
         <ul>
           <li>Built data-driven microsites and personalization frameworks, including custom preference centers, for a highly regulated organization.</li>
@@ -367,7 +440,7 @@
 
       <div class="tl-item">
         <div class="tl-num">2</div>
-        <div class="tl-head"><span class="tl-role">Lead Technical Consultant</span><span class="tl-dates">11/14 — 07/20</span></div>
+        <div class="tl-head"><h3 class="tl-role">Lead Technical Consultant</h3><span class="tl-dates">11/14 — 07/20</span></div>
         <div class="tl-company">Salesforce · New York, NY</div>
         <ul>
           <li>Led turnaround engagements for red accounts, refactoring automation logic and improving deliverability and governance.</li>
@@ -376,7 +449,7 @@
 
       <div class="tl-item">
         <div class="tl-num">1</div>
-        <div class="tl-head"><span class="tl-role">Digital Marketing Producer</span><span class="tl-dates">12/12 — 10/14</span></div>
+        <div class="tl-head"><h3 class="tl-role">Digital Marketing Producer</h3><span class="tl-dates">12/12 — 10/14</span></div>
         <div class="tl-company">WebMD / Medscape · New York, NY</div>
         <ul>
           <li>Produced personalized email campaigns in ExactTarget (SFMC) across 40+ newsletter categories, focused on retention.</li>
@@ -409,7 +482,7 @@
 <section class="contact" id="contact">
   <div class="wrap">
     <div class="panel contact-panel" data-reveal>
-      <div class="tick tl"></div><div class="tick tr"></div><div class="tick bl"></div><div class="tick br"></div>
+      <div class="tick tl" aria-hidden="true"></div><div class="tick tr" aria-hidden="true"></div><div class="tick bl" aria-hidden="true"></div><div class="tick br" aria-hidden="true"></div>
       <h2>Looking for your next MarTech leader?</h2>
       <p>Open to full-time MarTech product and platform leadership roles — in-house teams in regulated industries especially welcome.</p>
       <div class="contact-links">
@@ -419,6 +492,8 @@
     </div>
   </div>
 </section>
+
+</main>
 
 <footer>
   <div class="wrap">
@@ -432,6 +507,29 @@
     entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); } });
   }, {threshold:0.15});
   document.querySelectorAll('[data-reveal]').forEach(el=>io.observe(el));
+
+  const navToggle = document.getElementById('navToggle');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  function closeMenu(){
+    navToggle.setAttribute('aria-expanded', 'false');
+    mobileMenu.setAttribute('data-open', 'false');
+    navToggle.setAttribute('aria-label', 'Open menu');
+  }
+  function openMenu(){
+    navToggle.setAttribute('aria-expanded', 'true');
+    mobileMenu.setAttribute('data-open', 'true');
+    navToggle.setAttribute('aria-label', 'Close menu');
+  }
+
+  navToggle.addEventListener('click', () => {
+    const isOpen = navToggle.getAttribute('aria-expanded') === 'true';
+    isOpen ? closeMenu() : openMenu();
+  });
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
+  });
 </script>
 
 </body>
